@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-b!b*n8ugcwhus#(y!+#s(fw(3*#jn9nl(b_bfrhgi@@j-*(y_j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'russian-roulette-game.onrender.com',
+    '127.0.0.1',
+    'localhost'
+]
 
 
 # Application definition
