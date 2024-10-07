@@ -48,7 +48,7 @@ class Command(BaseCommand):
             return
 
         url = f'https://api.telegram.org/bot{bot_token}/setWebhook'
-        webhook_url = f'https://russian-roulette-game.onrender.com/bot/{bot_token}/'
+        webhook_url = f'https://russian-roulette-game.onrender.com/bot/webhook/{bot_token}/'
 
         response = requests.get(url, params={'url': webhook_url})
 
