@@ -16,7 +16,7 @@ def setup_bot():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
-
+    
     return application
 
 bot_application = setup_bot()
