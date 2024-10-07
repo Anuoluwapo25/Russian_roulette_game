@@ -1,17 +1,24 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-class Player(models.Model):
-    score = models.IntegerField(default=0)
-    last_shot_time = models.DateTimeField(null=True, blank=True)
-
-    def __str__(self):
-        return f"Player: {self.custom_user.username} - Score: {self.score}"
-
 class CustomUser(AbstractUser):
-    telegram_id = models.BigIntegerField(unique=True, null=True, blank=True)
-    telegram_username = models.CharField(max_length=255, null=True, blank=True)
-    player = models.OneToOneField(Player, on_delete=models.CASCADE, null=True, blank=True)
+    telegram_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     
     def __str__(self):
-        return f"{self.username} - Telegram Username: {self.telegram_username} - Telegram ID: {self.telegram_id}"
+        return self.username
+
+class Player(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    wallet_connected = models.BooleanField(default=False)
+    score = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.user.username
+
+class GameSession(models.Model):
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    result = models.IntegerField()  # Stores the outcome of the game or random number
+
+    def __str__(self):
+        return f"Game for {self.player.user.username} at {self.timestamp}"

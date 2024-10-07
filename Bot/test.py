@@ -1,6 +1,13 @@
 import requests
+import os
+from dotenv import load_dotenv
 
-BOT_TOKEN = '7618149231:AAEexKMU147voLpVvfbTc_av4ZRMsShiYQ4'
-url = f"https://api.telegram.org/bot{BOT_TOKEN}/getMe"
+# Load environment variables from .env file
+load_dotenv()
+
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+print(TELEGRAM_BOT_TOKEN)
+
+url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getMe"
 response = requests.get(url)
 print(response.json())

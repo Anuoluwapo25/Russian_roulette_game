@@ -40,7 +40,13 @@ INSTALLED_APPS = [
     'Bot',
 ]
 
-TELEGRAM_BOT_TOKEN = '7618149231:AAEexKMU147voLpVvfbTc_av4ZRMsShiYQ4'
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
