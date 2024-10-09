@@ -29,7 +29,7 @@
 # def set_webhook(request):
 #     if request.method == 'GET':
 #         bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
-#         base_url = getattr(settings, 'TELEGRAM_WEBHOOK_BASE_URL', 'https://your-domain.com')
+#         base_url = getattr(settings, 'TELEGRAM_WEBHOOK_BASE_URL', 'https://your-render-domain.onrender.com')
 #         webhook_path = getattr(settings, 'TELEGRAM_WEBHOOK_PATH', f'/bot/webhook/{bot_token}/')
 #         webhook_url = f'{base_url}{webhook_path}'
 
@@ -46,3 +46,4 @@ from django.shortcuts import render
 
 def breevs(request):
     return render(request, 'breevs.html')
+
