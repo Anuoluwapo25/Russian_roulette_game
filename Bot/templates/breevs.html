@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div id="app">
+        <h1>Welcome to My Telegram Mini App</h1>
+        <button onclick="sendMessage()">Send Message</button>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>
+
+# static/js/app.js
+let tg = window.Telegram.WebApp;
+
+tg.expand();
+
+function sendMessage() {
+    tg.sendData("Hello from Mini App!");
+}
+
+tg.onEvent('mainButtonClicked', function(){
+    tg.sendData("Main button was clicked");
+});
+
+// Initialize the app
+tg.ready();
+
+# static/css/style.css
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: var(--tg-theme-bg-color, #ffffff);
+    color: var(--tg-theme-text-color, #000000);
+}
+
+#app {
+    text-align: center;
+}
+
+button {
+    background-color: var(--tg-theme-button-color, #3390ec);
+    color: var(--tg-theme-button-text-color, #ffffff);
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
