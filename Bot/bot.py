@@ -32,27 +32,77 @@
 #     main()
 
 
+# from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
+# from telegram.ext import CommandHandler, ContextTypes, Application
+# import os
+
+# application = Application.builder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
+
+# async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     web_app = WebAppInfo(url="https://russian-roulette-game.onrender.com/breevs/")
+#     await update.message.reply_text(
+#         "Welcome! Click the button below to open Breevs.",
+#         reply_markup=InlineKeyboardMarkup.from_button(
+#             InlineKeyboardButton(text="Open Breevs", web_app=web_app)
+#         )
+#     )
+
+
+# application.add_handler(CommandHandler("start", start))
+# # application.run_polling(timeout=0)
+# application.run_webhook(
+#     listen="0.0.0.0",
+#     port=int(os.getenv("PORT")),
+#     url_path=os.getenv('TELEGRAM_BOT_TOKEN'),  
+#     webhook_url=f"https://russian-roulette-game.onrender.com/{os.getenv('TELEGRAM_BOT_TOKEN')}"
+# )
+
+
+import logging
 from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, ContextTypes, Application
 import os
 
-application = Application.builder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
+# Set up logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# Define PORT correctly at the top level
+PORT = int(os.environ.get('PORT', 8000))
+TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+WEBHOOK_URL = f"https://russian-roulette-game.onrender.com/{TOKEN}"
+
+logger.info(f"Starting bot with PORT: {PORT}, TOKEN: {TOKEN[:5]}..., WEBHOOK_URL: {WEBHOOK_URL}")
+
+application = Application.builder().token(TOKEN).build()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    web_app = WebAppInfo(url="https://russian-roulette-game.onrender.com/breevs/")
-    await update.message.reply_text(
-        "Welcome! Click the button below to open Breevs.",
-        reply_markup=InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton(text="Open Breevs", web_app=web_app)
+    try:
+        logger.info(f"Received /start command from user {update.effective_user.id}")
+        web_app = WebAppInfo(url="https://russian-roulette-game.onrender.com/breevs/")
+        await update.message.reply_text(
+            "Welcome! Click the button below to open Breevs.",
+            reply_markup=InlineKeyboardMarkup.from_button(
+                InlineKeyboardButton(text="Open Breevs", web_app=web_app)
+            )
         )
-    )
-
+        logger.info("Successfully sent response to /start command")
+    except Exception as e:
+        logger.error(f"Error in start command: {str(e)}", exc_info=True)
 
 application.add_handler(CommandHandler("start", start))
-# application.run_polling(timeout=0)
-application.run_webhook(
-    listen="0.0.0.0",
-    port=int(os.getenv("PORT")),
-    url_path=os.getenv('TELEGRAM_BOT_TOKEN'),  
-    webhook_url=f"https://russian-roulette-game.onrender.com/{os.getenv('TELEGRAM_BOT_TOKEN')}"
-)
+
+def main():
+    try:
+        application.run_webhook(
+            listen="0.0.0.0",
+            port=PORT,
+            url_path=TOKEN,
+            webhook_url=WEBHOOK_URL
+        )
+        logger.info(f"Started webhook on port {PORT}")
+    except Exception as e:
+        logger.error(f"Failed to start webhook: {str(e)}", exc_info=True)
+
+if __name__ == '__main__':
+    main()
