@@ -49,10 +49,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 application.add_handler(CommandHandler("start", start))
-application.run_polling(timeout=120)
+# application.run_polling(timeout=0)
 application.run_webhook(
     listen="0.0.0.0",
-    port=int(os.getenv("PORT", '10000')),
+    port=int(os.getenv("PORT", '8000')),
     url_path=os.getenv('TELEGRAM_BOT_TOKEN'),  
     webhook_url=f"https://your-render-domain.onrender.com/{os.getenv('TELEGRAM_BOT_TOKEN')}"
 )
