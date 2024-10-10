@@ -54,5 +54,5 @@ application.run_webhook(
     listen="0.0.0.0",
     port=int(os.getenv("PORT", '8000')),
     url_path=os.getenv('TELEGRAM_BOT_TOKEN'),  
-    webhook_url=f"https://your-render-domain.onrender.com/{os.getenv('TELEGRAM_BOT_TOKEN')}"
+    webhook_url=f"https://russian-roulette-game.onrender.com/{os.getenv('TELEGRAM_BOT_TOKEN')}"
 )
