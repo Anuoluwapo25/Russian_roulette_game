@@ -52,7 +52,7 @@ application.add_handler(CommandHandler("start", start))
 # application.run_polling(timeout=0)
 application.run_webhook(
     listen="0.0.0.0",
-    port=int(os.getenv("PORT", '8000')),
+    port=int(os.getenv("PORT")),
     url_path=os.getenv('TELEGRAM_BOT_TOKEN'),  
     webhook_url=f"https://russian-roulette-game.onrender.com/{os.getenv('TELEGRAM_BOT_TOKEN')}"
 )
