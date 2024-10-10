@@ -131,7 +131,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 AUTH_USER_MODEL = 'Bot.CustomUser'
-PORT = int(os.environ.get('PORT', 8000))
+PORT = int(os.environ.get('PORT', 10000))
 
 
 STATIC_URL = '/static/'
