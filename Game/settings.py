@@ -136,18 +136,18 @@ PORT = int(os.environ.get('PORT', 10000))
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # STATICFILES_DIRS = [
 #     BASE_DIR / "static",
 # ]
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
-STATICFILES_DIRS = [
-    # BASE_DIR / "static",
-    BASE_DIR / 'Bot' / 'static',
-]
+# STATICFILES_DIRS = [
+#     # BASE_DIR / "static",
+#     BASE_DIR / 'Bot' / 'static',
+# ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
