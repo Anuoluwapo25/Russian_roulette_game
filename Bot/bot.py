@@ -70,6 +70,7 @@ logger = logging.getLogger(__name__)
 # Define PORT correctly at the top level
 PORT = int(os.environ.get('PORT', 8000))
 TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+print('TOKEN')
 WEBHOOK_URL = f"https://russian-roulette-game.onrender.com/{TOKEN}"
 
 logger.info(f"Starting bot with PORT: {PORT}, TOKEN: {TOKEN[:5]}..., WEBHOOK_URL: {WEBHOOK_URL}")
