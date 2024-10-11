@@ -79,7 +79,7 @@ class Command(BaseCommand):
             return
 
         url = f'https://api.telegram.org/bot{bot_token}/setWebhook'
-        webhook_url = f'https://russian-roulette-game.onrender.com/webhook/{bot_token}/'
+        webhook_url = f'https://russian-roulette-game.onrender.com/breevs/webhook/{bot_token}/'
 
         self.stdout.write(self.style.WARNING(f'Setting webhook to: {webhook_url}'))
 
