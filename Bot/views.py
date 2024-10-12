@@ -1,50 +1,70 @@
-# from django.http import HttpResponse
-# from django.views.decorators.csrf import csrf_exempt
-# from django.conf import settings
-# from telegram import Update
-# from telegram.ext import Application
-# import json
-# import os
-# from .bot import application
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from telegram import Update
+from telegram.ext import ApplicationBuilder
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+import os
+import json
 
-# @csrf_exempt
-# def webhook(request):
-#     if request.method == 'POST':
-#         token = request.META.get('HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN')
-#         if token != os.environ.get('TELEGRAM_BOT_TOKEN'):
-#             return HttpResponse(status=403)
+# Telegram bot setup
+application = ApplicationBuilder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
 
-#         try:
-#             update = Update.de_json(json.loads(request.body), application.bot)
-            
-#             application.update_queue.put(update)
-            
-#             return HttpResponse('OK')
-#         except Exception as e:
-#             print(f"Error processing update: {str(e)}")
-#             return HttpResponse(status=500)
-#     else:
-#         return HttpResponse(status=405)  
-
-# def set_webhook(request):
-#     if request.method == 'GET':
-#         bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
-#         base_url = getattr(settings, 'TELEGRAM_WEBHOOK_BASE_URL', 'https://your-render-domain.onrender.com')
-#         webhook_path = getattr(settings, 'TELEGRAM_WEBHOOK_PATH', f'/bot/webhook/{bot_token}/')
-#         webhook_url = f'{base_url}{webhook_path}'
-
-#         try:
-#             application.bot.set_webhook(url=webhook_url)
-#             return HttpResponse(f"Webhook set to {webhook_url}")
-#         except Exception as e:
-#             return HttpResponse(f"Failed to set webhook: {str(e)}", status=500)
-#     else:
-#         return HttpResponse(status=405)  
+class TelegramWebhookView(APIView):
+    def post(self, request):
+        try:
+            update = Update.de_json(json.loads(request.body), application.bot)
+            application.process_update(update)
+            return Response({"status": "ok"})
+        except json.JSONDecodeError:
+            return Response({"error": "Invalid JSON"}, status=400)
+        
+    # return Response({"error": "Invalid request"}, status=400)
 
 
-from django.shortcuts import render
+@method_decorator(csrf_exempt, name='dispatch')
+class TelegramAuthView(APIView):
+    def post(self, request):
+        try:
+            telegram_data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return Response({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
 
-def breevs(request):
-    return render(request, 'breevs.html')
+        user = authenticate(request, telegram_data=telegram_data)
+
+        if user is not None:
+            login(request, user)
+            return Response({
+                'id': user.id,
+                'telegram_id': user.telegram_id,
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'photo_url': user.photo_url,
+                'auth_date': user.auth_date.isoformat(),
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Authentication failed'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+
+class GetUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            'id': user.id,
+            'telegram_id': user.telegram_id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'photo_url': user.photo_url,
+            'auth_date': user.auth_date.isoformat(),
+        })

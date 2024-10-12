@@ -39,7 +39,7 @@ import os
 application = Application.builder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    web_app = WebAppInfo(url="https://russian-roulette-game.onrender.com/")
+    web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
     await update.message.reply_text(
         "Welcome! Click the button below to open Breevs.",
         reply_markup=InlineKeyboardMarkup.from_button(
@@ -49,12 +49,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 application.add_handler(CommandHandler("start", start))
-# application.run_polling(timeout=0)
+application.run_polling(timeout=20)
 application.run_webhook(
     listen="0.0.0.0",
     port=int(os.getenv('PORT')),
     url_path=os.getenv('TELEGRAM_BOT_TOKEN'),  
-    webhook_url=f"https://russian-roulette-game.onrender.com/{os.getenv('TELEGRAM_BOT_TOKEN')}"
+    webhook_url=f"https://russian-roulette-game.onrender.com/webhook/{os.getenv('TELEGRAM_BOT_TOKEN')}"
 )
 
 

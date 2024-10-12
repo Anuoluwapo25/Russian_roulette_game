@@ -1,9 +1,8 @@
 from django.urls import path
-from . import views
+from .views import TelegramWebhookView, TelegramAuthView, GetUserView
 
 urlpatterns = [
-    path('', views.breevs, name='breevs'),
-    # path('rankings/', views.rankings, name="rankings"),
-    # path('/play', views.play, name='play'),
-    # path('wallet', views.wallet, name='wallet'),
+    path('webhook/', TelegramWebhookView.as_view(), name='telegram_webhook'),
+    path('telegram-auth/', TelegramAuthView.as_view(), name='telegram_auth'),
+    path('get-user/', GetUserView.as_view(), name='get_user'),
 ]

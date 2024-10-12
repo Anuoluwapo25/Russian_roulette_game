@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Bot',
+    'rest_framework',
 ]
 
 import os
@@ -127,10 +128,27 @@ USE_I18N = True
 USE_TZ = True
 
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+}
+
+
+AUTHENTICATION_BACKENDS = [
+    'path.to.TelegramAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',  
+]
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-AUTH_USER_MODEL = 'Bot.CustomUser'
+AUTH_USER_MODEL = 'Bot.TelegramUser'
 PORT = int(os.environ.get('PORT', 10000))
 
 

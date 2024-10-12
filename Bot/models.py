@@ -1,14 +1,24 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-class CustomUser(AbstractUser):
-    telegram_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
-    
+class TelegramUser(AbstractUser):
+    telegram_id = models.CharField(max_length=255, unique=True)
+    username = models.CharField(max_length=255, blank=True, null=True)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
+    photo_url = models.URLField(blank=True, null=True)
+    auth_date = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return self.username
+        return f"{self.first_name} {self.last_name} ({self.telegram_id})"
+
+    class Meta:
+        verbose_name = 'Telegram User'
+        verbose_name_plural = 'Telegram Users'
+
 
 class Player(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(TelegramUser, on_delete=models.CASCADE)
     wallet_connected = models.BooleanField(default=False)
     score = models.IntegerField(default=0)
 
@@ -18,7 +28,7 @@ class Player(models.Model):
 class GameSession(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    result = models.IntegerField()  # Stores the outcome of the game or random number
+    result = models.IntegerField() 
 
     def __str__(self):
         return f"Game for {self.player.user.username} at {self.timestamp}"
