@@ -52,7 +52,9 @@ load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
-WEBHOOK_URL = '/Bot/webhook/'
+# WEBHOOK_URL = '/Bot/webhook/'
+
+WEBHOOK_URL = 'https://russian-roulette-game.onrender.com'
 
 
 MIDDLEWARE = [
