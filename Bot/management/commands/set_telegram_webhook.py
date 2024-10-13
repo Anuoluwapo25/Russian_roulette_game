@@ -31,6 +31,7 @@
 
 
 
+
 # management/commands/setup_webhook.py
 from django.core.management.base import BaseCommand
 from telegram.ext import Application
@@ -47,3 +48,8 @@ class Command(BaseCommand):
         webhook_url = f"{os.getenv('WEBHOOK_URL')}/webhook/"
         app.bot.set_webhook(webhook_url)
         self.stdout.write(self.style.SUCCESS(f'Successfully set webhook to {webhook_url}'))
+
+
+
+
+

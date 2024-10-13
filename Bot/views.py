@@ -70,18 +70,92 @@
 #         })
 
 
+# from django.http import HttpResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from .bot import setup_bot, get_application
+# from telegram import Update
+
+# bot = setup_bot()
+
+# @csrf_exempt
+# def telegram_webhook(request):
+#     if request.method == 'POST':
+#         update = Update.de_json(request.body.decode('utf-8'), get_application().bot)
+#         bot.process_update(update)
+#     return HttpResponse()
+
+
+
+
+
+import json
+import logging
 from django.http import HttpResponse
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from .bot import setup_bot, get_application
-from telegram import Update
-
-bot = setup_bot()
-
-@csrf_exempt
-def telegram_webhook(request):
-    if request.method == 'POST':
-        update = Update.de_json(request.body.decode('utf-8'), get_application().bot)
-        bot.process_update(update)
-    return HttpResponse()
+from django.utils.decorators import method_decorator
+from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CommandHandler, Application
+import os
+from dotenv import load_dotenv
 
 
+load_dotenv()
+
+logger = logging.getLogger(__name__)
+
+
+
+def get_application():
+    """Initialize the Telegram bot application."""
+    token = os.getenv('TELEGRAM_BOT_TOKEN')
+    if not token:
+        logger.error("Telegram bot token is not set. Please check your .env file.")
+        return None
+    return Application.builder().token(token).build()
+
+async def start(update: Update, context):
+    """Send a welcome message with a button linking to a Web App."""
+    web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
+    await update.message.reply_text(
+        "Welcome! Click the button below to open Breevs.",
+        reply_markup=InlineKeyboardMarkup.from_button(
+            InlineKeyboardButton(text="Open Breevs", web_app=web_app)
+        )
+    )
+
+def setup_bot():
+    """Set up the bot with command handlers."""
+    app = get_application()
+    if app:
+        app.add_handler(CommandHandler("start", start))
+    return app
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TelegramWebhookView(View):
+    async def post(self, request, *args, **kwargs):
+        try:
+            raw_body = request.body
+            logger.debug(f"Raw request body: {raw_body}")
+
+            data = json.loads(raw_body.decode('utf-8'))
+            logger.debug(f"Parsed JSON data: {data}")
+
+            update = Update.de_json(data, get_application().bot)
+
+            await self.process_update(update)
+
+        except json.JSONDecodeError:
+            logger.error("Failed to decode JSON. Check request format.")
+            return HttpResponse("Invalid JSON", status=400)
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return HttpResponse("Error", status=500)
+
+        return HttpResponse(status=200)
+
+    async def process_update(self, update):
+        """Process the incoming Telegram update."""
+        if update.message:
+            # Handle message updates here
+            logger.info(f"Received message: {update.message.text}")
