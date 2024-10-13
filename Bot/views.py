@@ -94,42 +94,10 @@ from django.http import HttpResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, Application
-import os
-from dotenv import load_dotenv
-
-
-load_dotenv()
+from telegram import Update
+from bot import get_application  
 
 logger = logging.getLogger(__name__)
-
-
-
-def get_application():
-    """Initialize the Telegram bot application."""
-    token = os.getenv('TELEGRAM_BOT_TOKEN')
-    if not token:
-        logger.error("Telegram bot token is not set. Please check your .env file.")
-        return None
-    return Application.builder().token(token).build()
-
-async def start(update: Update, context):
-    """Send a welcome message with a button linking to a Web App."""
-    web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
-    await update.message.reply_text(
-        "Welcome! Click the button below to open Breevs.",
-        reply_markup=InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton(text="Open Breevs", web_app=web_app)
-        )
-    )
-
-def setup_bot():
-    """Set up the bot with command handlers."""
-    app = get_application()
-    if app:
-        app.add_handler(CommandHandler("start", start))
-    return app
 
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramWebhookView(View):
@@ -142,9 +110,7 @@ class TelegramWebhookView(View):
             logger.debug(f"Parsed JSON data: {data}")
 
             update = Update.de_json(data, get_application().bot)
-
             await self.process_update(update)
-
         except json.JSONDecodeError:
             logger.error("Failed to decode JSON. Check request format.")
             return HttpResponse("Invalid JSON", status=400)
@@ -157,5 +123,5 @@ class TelegramWebhookView(View):
     async def process_update(self, update):
         """Process the incoming Telegram update."""
         if update.message:
-            # Handle message updates here
             logger.info(f"Received message: {update.message.text}")
+            # Add additional handling for messages if needed

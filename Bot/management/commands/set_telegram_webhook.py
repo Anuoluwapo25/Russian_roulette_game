@@ -32,22 +32,15 @@
 
 
 
-# management/commands/setup_webhook.py
-from django.core.management.base import BaseCommand
-from telegram.ext import Application
-from dotenv import load_dotenv
-import os
+import requests
 
-load_dotenv()
+def set_webhook():
+    bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
+    webhook_url = "https://<your-domain>/webhook/"  # Replace with your actual webhook URL
+    url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url={webhook_url}"
+    response = requests.get(url)
+    return response.json()
 
-class Command(BaseCommand):
-    help = 'Sets up the Telegram webhook'
-
-    def handle(self, *args, **options):
-        app = Application.builder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
-        webhook_url = f"{os.getenv('WEBHOOK_URL')}/webhook/"
-        app.bot.set_webhook(webhook_url)
-        self.stdout.write(self.style.SUCCESS(f'Successfully set webhook to {webhook_url}'))
 
 
 

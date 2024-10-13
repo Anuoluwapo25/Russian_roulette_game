@@ -59,18 +59,27 @@
 
 
 
-from django.conf import settings
-from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, Application
 import os
+import logging
+import json
+from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler
 from dotenv import load_dotenv
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 def get_application():
-    return Application.builder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
+    """Initialize the Telegram bot application."""
+    token = os.getenv('TELEGRAM_BOT_TOKEN')
+    if not token:
+        logger.error("Telegram bot token is not set. Please check your .env file.")
+        return None
+    return Application.builder().token(token).build()
 
 async def start(update: Update, context):
+    """Send a welcome message with a button linking to a Web App."""
     web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
     await update.message.reply_text(
         "Welcome! Click the button below to open Breevs.",
@@ -80,6 +89,9 @@ async def start(update: Update, context):
     )
 
 def setup_bot():
+    """Set up the bot with command handlers."""
     app = get_application()
-    app.add_handler(CommandHandler("start", start))
+    if app:
+        app.add_handler(CommandHandler("start", start))
     return app
+
