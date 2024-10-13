@@ -95,7 +95,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from telegram import Update
-from bot import get_application  
+from .bot import get_application  
 
 logger = logging.getLogger(__name__)
 
