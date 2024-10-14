@@ -59,72 +59,27 @@
 
 
 
-# import os
-# import logging
-# import json
-# from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
-# from telegram.ext import Application, CommandHandler
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# logger = logging.getLogger(__name__)
-
-# def get_application():
-#     """Initialize the Telegram bot application."""
-#     token = os.getenv('TELEGRAM_BOT_TOKEN')
-#     if not token:
-#         logger.error("Telegram bot token is not set. Please check your .env file.")
-#         return None
-#     return Application.builder().token(token).build()
-
-# async def start(update: Update, context):
-#     """Send a welcome message with a button linking to a Web App."""
-#     web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
-#     await update.message.reply_text(
-#         "Welcome! Click the button below to open Breevs.",
-#         reply_markup=InlineKeyboardMarkup.from_button(
-#             InlineKeyboardButton(text="Open Breevs", web_app=web_app)
-#         )
-#     )
-
-# def setup_bot():
-#     """Set up the bot with command handlers."""
-#     app = get_application()
-#     if app:
-#         app.add_handler(CommandHandler("start", start))
-#     return app
-
-
-
 import os
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
-from telegram.ext import Application, CommandHandler, ContextTypes
+import json
+from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Set up logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
 logger = logging.getLogger(__name__)
 
-# Initialize bot application with token
 def get_application():
+    """Initialize the Telegram bot application."""
     token = os.getenv('TELEGRAM_BOT_TOKEN')
     if not token:
         logger.error("Telegram bot token is not set. Please check your .env file.")
         return None
     return Application.builder().token(token).build()
 
-# Define the start command handler
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(update: Update, context):
     """Send a welcome message with a button linking to a Web App."""
-    logger.info("Received /start command from user: %s", update.message.from_user.id)
     web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
     await update.message.reply_text(
         "Welcome! Click the button below to open Breevs.",
@@ -133,14 +88,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     )
 
-# Set up the bot with command handlers
 def setup_bot():
+    """Set up the bot with command handlers."""
     app = get_application()
     if app:
         app.add_handler(CommandHandler("start", start))
     return app
 
-# Run the bot with webhook
+
 if __name__ == "__main__":
     application = setup_bot()
     if application:
@@ -155,3 +110,63 @@ if __name__ == "__main__":
             url_path=os.getenv('TELEGRAM_BOT_TOKEN'),
             webhook_url=webhook_url  # Public URL for webhook
         )
+
+
+# import os
+# import logging
+# from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+# from telegram.ext import Application, CommandHandler, ContextTypes
+# from dotenv import load_dotenv
+
+# # Load environment variables from .env file
+# load_dotenv()
+
+# # Set up logging
+# logging.basicConfig(
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#     level=logging.INFO
+# )
+# logger = logging.getLogger(__name__)
+
+# # Initialize bot application with token
+# def get_application():
+#     token = os.getenv('TELEGRAM_BOT_TOKEN')
+#     if not token:
+#         logger.error("Telegram bot token is not set. Please check your .env file.")
+#         return None
+#     return Application.builder().token(token).build()
+
+# # Define the start command handler
+# async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     """Send a welcome message with a button linking to a Web App."""
+#     logger.info("Received /start command from user: %s", update.message.from_user.id)
+#     web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
+#     await update.message.reply_text(
+#         "Welcome! Click the button below to open Breevs.",
+#         reply_markup=InlineKeyboardMarkup.from_button(
+#             InlineKeyboardButton(text="Open Breevs", web_app=web_app)
+#         )
+#     )
+
+# # Set up the bot with command handlers
+# def setup_bot():
+#     app = get_application()
+#     if app:
+#         app.add_handler(CommandHandler("start", start))
+#     return app
+
+# # Run the bot with webhook
+# if __name__ == "__main__":
+#     application = setup_bot()
+#     if application:
+#         # Webhook setup
+#         port = int(os.getenv("PORT", 8443))
+#         webhook_url = f"https://russian-roulette-game.onrender.com/webhook//{os.getenv('TELEGRAM_BOT_TOKEN')}"
+        
+#         logger.info("Setting up webhook...")
+#         application.run_webhook(
+#             listen="0.0.0.0",
+#             port=port,
+#             url_path=os.getenv('TELEGRAM_BOT_TOKEN'),
+#             webhook_url=webhook_url  # Public URL for webhook
+#         )
