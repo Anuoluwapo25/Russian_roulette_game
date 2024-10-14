@@ -100,7 +100,7 @@ if __name__ == "__main__":
     if application:
         # Webhook setup
         port = int(os.getenv("PORT", 8443))
-        webhook_url = f"https://russian-roulette-game.onrender.com/webhook/{os.getenv('TELEGRAM_BOT_TOKEN')}"
+        webhook_url = "https://russian-roulette-game.onrender.com/webhook/"
         
         logger.info("Setting up webhook...")
         application.run_webhook(
