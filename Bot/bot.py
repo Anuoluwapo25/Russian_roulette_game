@@ -100,12 +100,12 @@ if __name__ == "__main__":
     if application:
         # Webhook setup
         port = int(os.getenv("PORT", 8443))
-        webhook_url = "https://russian-roulette-game.onrender.com/webhook/"
+        webhook_url = "https://russian-roulette-game.onrender.com/webhook"
         
         logger.info("Setting up webhook...")
         application.run_webhook(
             listen="0.0.0.0",
             port=port,
-            url_path="webhook/",
+            url_path="webhook",
             webhook_url=webhook_url
         )
