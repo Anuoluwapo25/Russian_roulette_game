@@ -56,6 +56,8 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
 WEBHOOK_URL = 'https://russian-roulette-game.onrender.com'
 
+APPEND_SLASH = False
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
