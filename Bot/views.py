@@ -85,34 +85,35 @@
 #     return HttpResponse()
 
 
-import os
-import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from telegram.ext import Application
 from telegram import Update
-from .bot import application
+from telegram.ext import Application
+import json
+import os
 import logging
+from asgiref.sync import async_to_sync  # Import async_to_sync
 
 logger = logging.getLogger(__name__)
 
-bot_token = os.getenv("TELEGRAM_BOT_TOKEN")  
+bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
 application = Application.builder().token(bot_token).build()
 
-@csrf_exempt  
+@csrf_exempt
 def webhook_view(request):
     if request.method == "POST":
         try:
             update_data = json.loads(request.body)
             logger.debug(f"Raw request body: {update_data}")
             update = Update.de_json(update_data, application.bot)
-            # Process the update asynchronously
-            application.update_queue.put_nowait(update)
+           
+            async_to_sync(application.update_queue.put)(update)
             return JsonResponse({"status": "ok"}, status=200)
         except Exception as e:
-            print(f"Error handling webhook request: {e}")
+            logger.error(f"Error handling webhook request: {e}")
             return JsonResponse({"status": "error", "error": str(e)}, status=500)
     return JsonResponse({"status": "not allowed"}, status=405)
+
 
 
 
