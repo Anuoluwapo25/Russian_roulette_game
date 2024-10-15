@@ -143,14 +143,21 @@ application = Application.builder().token(bot_token).build()
 import logging
 logger = logging.getLogger(__name__)
 
-@csrf_exempt 
+
+@csrf_exempt  # If you are not using CSRF protection for this view
 async def webhook_view(request):
-    if request.method == "POST":
-        update = Update.de_json(await request.json(), application.bot)
-        logger.info(f"Received update: {update}")
-        await application.process_update(update)
-        return JsonResponse({"status": "success"}, status=200)
-    return JsonResponse({"status": "bad request"}, status=400)
+    if request.method == 'POST':
+        try:
+            # Get the raw body and parse it as JSON
+            body = json.loads(request.body)
+            update = Update.de_json(body, application.bot)
+            # Process your update here
+            return JsonResponse({'status': 'success'})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 
 # @csrf_exempt  # Exempt from CSRF as Telegram's server doesn't provide CSRF tokens
