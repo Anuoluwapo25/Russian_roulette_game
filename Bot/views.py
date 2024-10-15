@@ -143,6 +143,7 @@ application = Application.builder().token(bot_token).build()
 import logging
 logger = logging.getLogger(__name__)
 
+@csrf_exempt 
 async def webhook_view(request):
     if request.method == "POST":
         update = Update.de_json(await request.json(), application.bot)
