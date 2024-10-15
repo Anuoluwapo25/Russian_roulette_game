@@ -134,12 +134,16 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from telegram import Update
-from .bot import get_application
+from .bot import setup_bot
 
 logger = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramWebhookView(View):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.application = setup_bot()
+
     async def post(self, request, *args, **kwargs):
         try:
             raw_body = request.body
@@ -148,8 +152,8 @@ class TelegramWebhookView(View):
             data = json.loads(raw_body.decode('utf-8'))
             logger.debug(f"Parsed JSON data: {data}")
             
-            update = Update.de_json(data, get_application().bot)
-            await self.process_update(update)
+            update = Update.de_json(data, self.application.bot)
+            await self.application.process_update(update)
         except json.JSONDecodeError as e:
             logger.error(f"JSON decode error: {e}")
             return HttpResponse("Invalid JSON", status=400)
@@ -158,9 +162,3 @@ class TelegramWebhookView(View):
             return HttpResponse("Error", status=500)
         
         return HttpResponse(status=200)
-    
-    async def process_update(self, update):
-        """Process the incoming Telegram update."""
-        if update.message:
-            logger.info(f"Received message: {update.message.text}")
-            # Add additional handling for messages if needed.

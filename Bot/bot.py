@@ -59,11 +59,67 @@
 
 
 
+# import os
+# import logging
+# from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
+# from telegram.ext import Application, CommandHandler
+# from dotenv import load_dotenv
+
+# load_dotenv()
+
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+
+# def get_application():
+#     """Initialize the Telegram bot application."""
+#     token = os.getenv('TELEGRAM_BOT_TOKEN')
+#     if not token:
+#         logger.error("Telegram bot token is not set. Please check your .env file.")
+#         return None
+#     return Application.builder().token(token).build()
+
+# async def start(update: Update, context):
+#     """Send a welcome message with a button linking to a Web App."""
+#     web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
+#     await update.message.reply_text(
+#         "Welcome! Click the button below to open Breevs.",
+#         reply_markup=InlineKeyboardMarkup.from_button(
+#             InlineKeyboardButton(text="Open Breevs", web_app=web_app)
+#         )
+#     )
+
+# def setup_bot():
+#     """Set up the bot with command handlers."""
+#     app = get_application()
+#     if app:
+#         app.add_handler(CommandHandler("start", start))
+#         return app
+#     else:
+#         logger.error("Failed to initialize the bot application.")
+#         return None
+
+# if __name__ == "__main__":
+#     application = setup_bot()
+#     if application:
+#         # Webhook setup
+#         port = int(os.getenv("PORT", 8443))
+#         webhook_url = "https://russian-roulette-game.onrender.com/webhook"
+        
+#         logger.info("Setting up webhook...")
+#         application.run_webhook(
+#             listen="0.0.0.0",
+#             port=port,
+#             url_path="webhook",
+#             webhook_url=webhook_url
+#         )
+
+
 import os
 import logging
 from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler
 from dotenv import load_dotenv
+from django.conf import settings
 
 load_dotenv()
 
@@ -89,23 +145,19 @@ async def start(update: Update, context):
     )
 
 def setup_bot():
-    """Set up the bot with command handlers."""
+    """Set up the bot with command handlers and set the webhook."""
     app = get_application()
     if app:
+        # Add command handlers
         app.add_handler(CommandHandler("start", start))
-    return app
-
-# if __name__ == "__main__":
-#     application = setup_bot()
-#     if application:
-#         # Webhook setup
-#         port = int(os.getenv("PORT", 8443))
-#         webhook_url = "https://russian-roulette-game.onrender.com/webhook"
         
-#         logger.info("Setting up webhook...")
-#         application.run_webhook(
-#             listen="0.0.0.0",
-#             port=port,
-#             url_path="webhook",
-#             webhook_url=webhook_url
-#         )
+        # Set the webhook
+        webhook_url = f"{settings.WEBHOOK_URL}/webhook"
+        app.bot.set_webhook(webhook_url)
+        
+        logger.info(f"Webhook set to: {webhook_url}")
+        
+        return app
+    else:
+        logger.error("Failed to initialize the bot application.")
+        return None
