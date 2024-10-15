@@ -85,47 +85,6 @@
 #     return HttpResponse()
 
 
-
-
-
-# import json
-# import logging
-# from django.http import HttpResponse
-# from django.views import View
-# from django.views.decorators.csrf import csrf_exempt
-# from django.utils.decorators import method_decorator
-# from telegram import Update
-# from .bot import get_application  
-
-# logger = logging.getLogger(__name__)
-
-# @method_decorator(csrf_exempt, name='dispatch')
-# class TelegramWebhookView(View):
-#     async def post(self, request, *args, **kwargs):
-#         try:
-#             raw_body = request.body
-#             logger.debug(f"Raw request body: {raw_body}")
-
-#             data = json.loads(raw_body.decode('utf-8'))
-#             logger.debug(f"Parsed JSON data: {data}")
-
-#             update = Update.de_json(data, get_application().bot)
-#             await self.process_update(update)
-#         except json.JSONDecodeError:
-#             logger.error("Failed to decode JSON. Check request format.")
-#             return HttpResponse("Invalid JSON", status=400)
-#         except Exception as e:
-#             logger.error(f"Unexpected error: {e}")
-#             return HttpResponse("Error", status=500)
-
-#         return HttpResponse(status=200)
-
-#     async def process_update(self, update):
-#         """Process the incoming Telegram update."""
-#         if update.message:
-#             logger.info(f"Received message: {update.message.text}")
-#             # Add additional handling for messages if needed
-
 import os
 import json
 from django.http import JsonResponse
@@ -136,29 +95,28 @@ from .bot import application
 import logging
 
 logger = logging.getLogger(__name__)
-# Initialize the bot application
-bot_token = os.getenv("TELEGRAM_BOT_TOKEN")  # Ensure your token is loaded from an environment variable
+
+bot_token = os.getenv("TELEGRAM_BOT_TOKEN")  
 application = Application.builder().token(bot_token).build()
 
-import logging
-logger = logging.getLogger(__name__)
-
-
-@csrf_exempt  # If you are not using CSRF protection for this view
-async def webhook_view(request):
-    if request.method == 'POST':
+@csrf_exempt  
+def webhook_view(request):
+    if request.method == "POST":
         try:
-            # Get the raw body and parse it as JSON
-            body = json.loads(request.body)
-            logging.info(f"Received update: {json.dumps(body)}") 
-            update = Update.de_json(body, application.bot)
-            logging.info(f"Received update: {json.dumps(update)}") 
-            # Process your update here
-            return JsonResponse({'status': 'success'})
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+            update_data = json.loads(request.body)
+            logger.debug(f"Raw request body: {update_data}")
+            update = Update.de_json(update_data, application.bot)
+            # Process the update asynchronously
+            application.update_queue.put_nowait(update)
+            return JsonResponse({"status": "ok"}, status=200)
+        except Exception as e:
+            print(f"Error handling webhook request: {e}")
+            return JsonResponse({"status": "error", "error": str(e)}, status=500)
+    return JsonResponse({"status": "not allowed"}, status=405)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
 
 
 
