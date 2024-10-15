@@ -152,7 +152,7 @@ def setup_bot():
         app.initialize()
         app.add_handler(CommandHandler("start", start))
         
-        webhook_url = f"{settings.WEBHOOK_URL}/webhook"
+        webhook_url = f"{settings.WEBHOOK_URL}"
         app.bot.set_webhook(webhook_url)
 
         logger.info(f"Webhook set to: {webhook_url}")
