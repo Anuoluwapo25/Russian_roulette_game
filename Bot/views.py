@@ -140,19 +140,31 @@ logger = logging.getLogger(__name__)
 bot_token = os.getenv("TELEGRAM_BOT_TOKEN")  # Ensure your token is loaded from an environment variable
 application = Application.builder().token(bot_token).build()
 
-@csrf_exempt  # Exempt from CSRF as Telegram's server doesn't provide CSRF tokens
-def webhook_view(request):
-    if request.method == "POST":
-        try:
-            # Parse the incoming JSON update from Telegram
-            update_data = json.loads(request.body)
-            logger.debug(f"Raw request body: {update_data}")
-            update = Update.de_json(update_data, application.bot)
+import logging
+logger = logging.getLogger(__name__)
 
-            # Process the update asynchronously
-            application.update_queue.put_nowait(update)
-            return JsonResponse({"status": "ok"}, status=200)
-        except Exception as e:
-            print(f"Error handling webhook request: {e}")
-            return JsonResponse({"status": "error", "error": str(e)}, status=500)
-    return JsonResponse({"status": "not allowed"}, status=405)
+async def webhook_view(request):
+    if request.method == "POST":
+        update = Update.de_json(await request.json(), application.bot)
+        logger.info(f"Received update: {update}")
+        await application.process_update(update)
+        return JsonResponse({"status": "success"}, status=200)
+    return JsonResponse({"status": "bad request"}, status=400)
+
+
+# @csrf_exempt  # Exempt from CSRF as Telegram's server doesn't provide CSRF tokens
+# def webhook_view(request):
+#     if request.method == "POST":
+#         try:
+#             # Parse the incoming JSON update from Telegram
+#             update_data = json.loads(request.body)
+#             logger.debug(f"Raw request body: {update_data}")
+#             update = Update.de_json(update_data, application.bot)
+
+#             # Process the update asynchronously
+#             application.update_queue.put_nowait(update)
+#             return JsonResponse({"status": "ok"}, status=200)
+#         except Exception as e:
+#             print(f"Error handling webhook request: {e}")
+#             return JsonResponse({"status": "error", "error": str(e)}, status=500)
+#     return JsonResponse({"status": "not allowed"}, status=405)
