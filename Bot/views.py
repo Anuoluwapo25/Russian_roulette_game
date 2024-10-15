@@ -127,38 +127,24 @@
 #             # Add additional handling for messages if needed
 
 
-import json
-import logging
+# views.py
 from django.http import HttpResponse
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from telegram import Update
-from .bot import setup_bot
-
-logger = logging.getLogger(__name__)
+import json
+from .bot import  application, logger  
 
 @method_decorator(csrf_exempt, name='dispatch')
-class TelegramWebhookView(View):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.application = setup_bot()
-
+class TelegramBotWebhookView(View):
     async def post(self, request, *args, **kwargs):
         try:
-            raw_body = request.body
-            logger.info(f"Received webhook request: {raw_body}")
-            
-            data = json.loads(raw_body.decode('utf-8'))
-            logger.debug(f"Parsed JSON data: {data}")
-            
-            update = Update.de_json(data, self.application.bot)
-            await self.application.process_update(update)
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON decode error: {e}")
-            return HttpResponse("Invalid JSON", status=400)
+            body = request.body.decode('utf-8')
+            logger.debug(f"Raw request body: {body}")
+            update = Update.de_json(json.loads(body), application.bot)
+            await application.process_update(update)
+            return HttpResponse("OK")
         except Exception as e:
-            logger.error(f"Unexpected error: {e}", exc_info=True)
-            return HttpResponse("Error", status=500)
-        
-        return HttpResponse(status=200)
+            logger.error(f"Error processing update: {str(e)}")
+            return HttpResponse(status=500)

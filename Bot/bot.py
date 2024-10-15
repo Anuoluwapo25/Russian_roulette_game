@@ -126,13 +126,19 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Global application instance
+application = None
+
 def get_application():
     """Initialize the Telegram bot application."""
-    token = os.getenv('TELEGRAM_BOT_TOKEN')
-    if not token:
-        logger.error("Telegram bot token is not set. Please check your .env file.")
-        return None
-    return Application.builder().token(token).build()
+    global application
+    if application is None:
+        token = os.getenv('TELEGRAM_BOT_TOKEN')
+        if not token:
+            logger.error("Telegram bot token is not set. Please check your .env file.")
+            return None
+        application = Application.builder().token(token).build()
+    return application
 
 async def start(update: Update, context):
     """Send a welcome message with a button linking to a Web App."""
@@ -146,19 +152,19 @@ async def start(update: Update, context):
 
 def setup_bot():
     """Set up the bot with command handlers and set the webhook."""
-    app = get_application()
-    if app:
+    global application
+    application = get_application()
+    if application:
         # Add command handlers
-        app.initialize()
-        app.add_handler(CommandHandler("start", start))
+        application.add_handler(CommandHandler("start", start))
         
         # Set the webhook
-        webhook_url = f"{settings.WEBHOOK_URL}/webhook"
-        app.bot.set_webhook(webhook_url)
+        webhook_url = "https://russian-roulette-game.onrender.com/webhook"
+        application.bot.set_webhook(webhook_url)
         
         logger.info(f"Webhook set to: {webhook_url}")
         
-        return app
+        return application
     else:
         logger.error("Failed to initialize the bot application.")
         return None

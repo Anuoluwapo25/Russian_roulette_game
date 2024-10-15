@@ -54,7 +54,10 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
 # WEBHOOK_URL = '/Bot/webhook/'
 
-WEBHOOK_URL = 'https://russian-roulette-game.onrender.com'
+# WEBHOOK_URL = 'https://russian-roulette-game.onrender.com'
+
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://russian-roulette-game.onrender.com/webhook")
+
 
 APPEND_SLASH = False
 
