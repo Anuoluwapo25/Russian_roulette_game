@@ -137,7 +137,7 @@ import json
 from .bot import  application, logger  
 
 @method_decorator(csrf_exempt, name='dispatch')
-class TelegramBotWebhookView(View):
+class TelegramWebhookView(View):
     async def post(self, request, *args, **kwargs):
         try:
             body = request.body.decode('utf-8')
