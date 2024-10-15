@@ -88,63 +88,41 @@
 
 
 
-# import json
-# import logging
-# from django.http import HttpResponse
-# from django.views import View
-# from django.views.decorators.csrf import csrf_exempt
-# from django.utils.decorators import method_decorator
-# from telegram import Update
-# from .bot import get_application  
-
-# logger = logging.getLogger(__name__)
-
-# @method_decorator(csrf_exempt, name='dispatch')
-# class TelegramWebhookView(View):
-#     async def post(self, request, *args, **kwargs):
-#         try:
-#             raw_body = request.body
-#             logger.debug(f"Raw request body: {raw_body}")
-
-#             data = json.loads(raw_body.decode('utf-8'))
-#             logger.debug(f"Parsed JSON data: {data}")
-
-#             update = Update.de_json(data, get_application().bot)
-#             await self.process_update(update)
-#         except json.JSONDecodeError:
-#             logger.error("Failed to decode JSON. Check request format.")
-#             return HttpResponse("Invalid JSON", status=400)
-#         except Exception as e:
-#             logger.error(f"Unexpected error: {e}")
-#             return HttpResponse("Error", status=500)
-
-#         return HttpResponse(status=200)
-
-#     async def process_update(self, update):
-#         """Process the incoming Telegram update."""
-#         if update.message:
-#             logger.info(f"Received message: {update.message.text}")
-#             # Add additional handling for messages if needed
-
-
-# views.py
+import json
+import logging
 from django.http import HttpResponse
 from django.views import View
-from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from telegram import Update
-import json
-from .bot import  application, logger  
+from .bot import get_application  
+
+logger = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramWebhookView(View):
     async def post(self, request, *args, **kwargs):
         try:
-            body = request.body.decode('utf-8')
-            logger.debug(f"Raw request body: {body}")
-            update = Update.de_json(json.loads(body), application.bot)
-            await application.process_update(update)
-            return HttpResponse("OK")
+            raw_body = request.body
+            logger.debug(f"Raw request body: {raw_body}")
+
+            data = json.loads(raw_body.decode('utf-8'))
+            logger.debug(f"Parsed JSON data: {data}")
+
+            update = Update.de_json(data, get_application().bot)
+            await self.process_update(update)
+        except json.JSONDecodeError:
+            logger.error("Failed to decode JSON. Check request format.")
+            return HttpResponse("Invalid JSON", status=400)
         except Exception as e:
-            logger.error(f"Error processing update: {str(e)}")
-            return HttpResponse(status=500)
+            logger.error(f"Unexpected error: {e}")
+            return HttpResponse("Error", status=500)
+
+        return HttpResponse(status=200)
+
+    async def process_update(self, update):
+        """Process the incoming Telegram update."""
+        if update.message:
+            logger.info(f"Received message: {update.message.text}")
+            # Add additional handling for messages if needed
+
