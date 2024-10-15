@@ -149,6 +149,7 @@ def setup_bot():
     app = get_application()
     if app:
         # Add command handlers
+        app.initialize()
         app.add_handler(CommandHandler("start", start))
         
         # Set the webhook
