@@ -126,75 +126,43 @@
 #             logger.info(f"Received message: {update.message.text}")
 #             # Add additional handling for messages if needed
 
-# import os
-# import json
-# from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-# from telegram.ext import Application
-# from telegram import Update
-# from .bot import application
-# import logging
-
-# logger = logging.getLogger(__name__)
-# # Initialize the bot application
-# bot_token = os.getenv("TELEGRAM_BOT_TOKEN")  # Ensure your token is loaded from an environment variable
-# application = Application.builder().token(bot_token).build()
-
-# import logging
-# logger = logging.getLogger(__name__)
-
-
-# @csrf_exempt  # If you are not using CSRF protection for this view
-# async def webhook_view(request):
-#     if request.method == 'POST':
-#         try:
-#             # Get the raw body and parse it as JSON
-#             body = json.loads(request.body)
-#             logging.info(f"Received update: {json.dumps(body)}") 
-#             update = Update.de_json(body, application.bot)
-#             logging.info(f"Received update: {json.dumps(update)}") 
-#             # Process your update here
-#             return JsonResponse({'status': 'success'})
-#         except json.JSONDecodeError:
-#             return JsonResponse({'error': 'Invalid JSON'}, status=400)
-
-#     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-
-
-
-
-
-# views.py
-
+import os
 import json
-import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from telegram.ext import Application
 from telegram import Update
-from .bot import application  # Import the application from bot.py
+from .bot import application
+import logging
 
 logger = logging.getLogger(__name__)
+# Initialize the bot application
+bot_token = os.getenv("TELEGRAM_BOT_TOKEN")  # Ensure your token is loaded from an environment variable
+application = Application.builder().token(bot_token).build()
 
-@csrf_exempt
+import logging
+logger = logging.getLogger(__name__)
+
+
+@csrf_exempt  # If you are not using CSRF protection for this view
 async def webhook_view(request):
     if request.method == 'POST':
         try:
+            # Get the raw body and parse it as JSON
             body = json.loads(request.body)
-            logger.info(f"Received update: {json.dumps(body)}")
-            
+            logging.info(f"Received update: {json.dumps(body)}") 
             update = Update.de_json(body, application.bot)
-            logger.info(f"Processed update: {update}")
-            
-            # Process the update
-            await application.process_update(update)
-            
+            logging.info(f"Received update: {json.dumps(update)}") 
+            # Process your update here
             return JsonResponse({'status': 'success'})
         except json.JSONDecodeError:
-            logger.error("Invalid JSON in webhook request")
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
-        except Exception as e:
-            logger.error(f"Error processing update: {str(e)}")
-            return JsonResponse({'error': 'Internal server error'}, status=500)
-    
+
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
+
+
+
+

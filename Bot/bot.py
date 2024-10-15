@@ -32,23 +32,25 @@
 #     main()
 
 
-# from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
-# from telegram.ext import CommandHandler, ContextTypes, Application
-# import os
+from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CommandHandler, ContextTypes, Application
+import os
 
-# application = Application.builder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
+application = Application.builder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
 
-# async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
-#     await update.message.reply_text(
-#         "Welcome! Click the button below to open Breevs.",
-#         reply_markup=InlineKeyboardMarkup.from_button(
-#             InlineKeyboardButton(text="Open Breevs", web_app=web_app)
-#         )
-#     )
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
+    await update.message.reply_text(
+        "Welcome! Click the button below to open Breevs.",
+        reply_markup=InlineKeyboardMarkup.from_button(
+            InlineKeyboardButton(text="Open Breevs", web_app=web_app)
+        )
+    )
 
 
-# application.add_handler(CommandHandler("start", start))
+application.add_handler(CommandHandler("start", start))
+
+application.initialize()
 # application.run_polling(timeout=20)
 # application.run_webhook(
 #     listen="0.0.0.0",
@@ -113,37 +115,6 @@
 #         return None
 
 
-
-# bot.py
-
-import os
-import logging
-from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, ContextTypes
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Initialize the bot application
-bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
-application = Application.builder().token(bot_token).build()
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    web_app = WebAppInfo(url="https://russian-roullette-4taj.vercel.app/")
-    await update.message.reply_text(
-        "Welcome! Click the button below to open Breevs.",
-        reply_markup=InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton(text="Open Breevs", web_app=web_app)
-        )
-    )
-    logger.info(f"Start command sent to user {update.effective_user.id}")
-
-# Add the start command handler
-application.add_handler(CommandHandler("start", start))
-
-# Make sure the application is fully initialized
-application.initialize()
 
 
 
