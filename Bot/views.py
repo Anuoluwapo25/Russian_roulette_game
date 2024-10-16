@@ -1,5 +1,4 @@
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
@@ -10,10 +9,14 @@ from telegram.ext import Application
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 import os
+import os.path
 import json
 import logging
 from asgiref.sync import async_to_sync
-from .models import Player, GameSession, TelegramUser 
+from .models import Player
+from .auth_backends import TelegramAuthBackend
+
+
 
 
 logging.basicConfig(
@@ -32,7 +35,7 @@ def webhook_view(request):
         try:
             logger.debug("Received webhook POST request")
             logger.debug(f"Request body: {request.body}")
-            
+
             update_data = json.loads(request.body)
             logger.info(f"Raw request body: {update_data}")
             
@@ -42,7 +45,7 @@ def webhook_view(request):
             async_to_sync(application.update_queue.put)(update)
             return JsonResponse({"status": "ok"}, status=200)
         except Exception as e:
-            logger.error(f"Error handling webhook request: {e}")
+            logger.error(f"Error handling webhook request: {e}", exc_info=True)
             return JsonResponse({"status": "error", "error": str(e)}, status=500)
     return JsonResponse({"status": "not allowed"}, status=405)
 
@@ -50,28 +53,22 @@ def webhook_view(request):
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramAuthView(APIView):
     def post(self, request):
-        try:
-            telegram_data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return Response({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = authenticate(request, telegram_data=telegram_data)
-
-        if user is not None:
-            login(request, user)
+        auth_data = request.data
+        backend = TelegramAuthBackend()
+        user = backend.authenticate(request, telegram_data=auth_data)
+        
+        if user:
+            login(request, user, backend='authentication.TelegramAuthBackend')
+            player, created = Player.objects.get_or_create(user=user)
             return Response({
-                'id': user.id,
-                'telegram_id': user.telegram_id,
-                'username': user.username,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'photo_url': user.photo_url,
-                'auth_date': user.auth_date.isoformat(),
+                'message': 'Authentication successful',
+                'user_id': user.id,
+                'player_id': player.id
             }, status=status.HTTP_200_OK)
         else:
-            return Response({'error': 'Authentication failed'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
+            return Response({
+                'message': 'Authentication failed'
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
 class GetUserView(APIView):
     permission_classes = [IsAuthenticated]

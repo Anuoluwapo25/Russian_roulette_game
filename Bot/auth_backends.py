@@ -1,47 +1,54 @@
-import os
+# authentication.py
+from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import get_user_model
-from dotenv import load_dotenv
+from django.utils import timezone
 import hashlib
 import hmac
-import time
-
-
-load_dotenv()
+import os
 
 User = get_user_model()
 
-class TelegramAuthBackend:
+class TelegramAuthBackend(BaseBackend):
     def authenticate(self, request, telegram_data=None):
-        if not telegram_data:
+        if telegram_data is None:
             return None
 
         bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
         if not bot_token:
             raise ValueError("TELEGRAM_BOT_TOKEN is not set in the environment")
-
-        # Verify the data
-        data_check_string = '\n'.join(f"{k}={v}" for k, v in sorted(telegram_data.items()) if k != 'hash')
+        
+        data_check_string = '\n'.join(f'{k}={v}' for k, v in sorted(telegram_data.items()) if k != 'hash')
         secret_key = hashlib.sha256(bot_token.encode()).digest()
-        computed_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+        hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
 
-        if computed_hash != telegram_data['hash']:
+        if hash != telegram_data['hash']:
             return None
 
-        # Check if the auth date is not older than 1 day
+        # Check if the auth_date is not older than a day
         auth_date = int(telegram_data['auth_date'])
-        if time.time() - auth_date > 86400:
+        if timezone.now().timestamp() - auth_date > 86400:
             return None
 
-        # Get or create user based on Telegram ID
-        user, created = User.objects.update_or_create(
+        # Get or create the user
+        user, created = User.objects.get_or_create(
             telegram_id=telegram_data['id'],
             defaults={
-                'username': telegram_data.get('username', ''),
+                'telegram_username': telegram_data.get('username', ''),
                 'first_name': telegram_data.get('first_name', ''),
                 'last_name': telegram_data.get('last_name', ''),
                 'photo_url': telegram_data.get('photo_url', ''),
+                'auth_date': timezone.now(),
             }
         )
+
+        if not created:
+            # Update user information
+            user.telegram_username = telegram_data.get('username', '')
+            user.first_name = telegram_data.get('first_name', '')
+            user.last_name = telegram_data.get('last_name', '')
+            user.photo_url = telegram_data.get('photo_url', '')
+            user.auth_date = timezone.now()
+            user.save()
 
         return user
 
