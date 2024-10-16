@@ -15,7 +15,13 @@ import logging
 from asgiref.sync import async_to_sync
 from .models import Player, GameSession, TelegramUser 
 
+
+logging.basicConfig(
+    level=logging.DEBUG,  
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
+
 
 bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
 application = Application.builder().token(bot_token).build()
@@ -24,9 +30,14 @@ application = Application.builder().token(bot_token).build()
 def webhook_view(request):
     if request.method == "POST":
         try:
+            logger.debug("Received webhook POST request")
+            logger.debug(f"Request body: {request.body}")
+            
             update_data = json.loads(request.body)
             logger.info(f"Raw request body: {update_data}")
+            
             update = Update.de_json(update_data, application.bot)
+            logger.debug(f"Telegram update object: {update}") 
            
             async_to_sync(application.update_queue.put)(update)
             return JsonResponse({"status": "ok"}, status=200)
