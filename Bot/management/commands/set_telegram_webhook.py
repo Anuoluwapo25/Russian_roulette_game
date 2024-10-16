@@ -42,6 +42,7 @@
 #     return response.json()
 
 
+# set_webhook.py
 from django.core.management.base import BaseCommand
 from telegram.ext import Application
 import os
@@ -54,14 +55,13 @@ class Command(BaseCommand):
         async def set_webhook():
             token = os.getenv("TELEGRAM_BOT_TOKEN")
             application = Application.builder().token(token).build()
-            webhook_url = "https://russian-roulette-game.onrender.com/webhook/"  # Update with your actual URL
-            
-            # Set webhook asynchronously
+            webhook_url = "https://russian-roulette-game.onrender.com/webhook/"  # without token in URL
             await application.bot.set_webhook(url=webhook_url)
-            print(f"Webhook set to: {webhook_url}")
+            self.stdout.write(self.style.SUCCESS(f"Webhook set to: {webhook_url}"))
 
         # Run the async function within the event loop
         asyncio.run(set_webhook())
+
 
 
 

@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Bot',
+    'Bot.apps.BotConfig',
     'rest_framework',
 ]
 
@@ -151,6 +151,12 @@ AUTHENTICATION_BACKENDS = [
     'path.to.TelegramAuthBackend',
     'django.contrib.auth.backends.ModelBackend',  
 ]
+
+
+CORS_ALLOWED_ORIGINS = [
+    "https://russian-roullette-4taj.vercel.app",
+]
+CORS_ALLOW_CREDENTIALS = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
