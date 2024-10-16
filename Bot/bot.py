@@ -94,6 +94,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 application.add_handler(CommandHandler("start", start))
 
+
 async def run_bot():
     logger.info("Starting the bot with webhook...")
     await application.run_webhook(

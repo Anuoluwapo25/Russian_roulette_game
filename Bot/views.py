@@ -25,7 +25,7 @@ def webhook_view(request):
     if request.method == "POST":
         try:
             update_data = json.loads(request.body)
-            logger.debug(f"Raw request body: {update_data}")
+            logger.info(f"Raw request body: {update_data}")
             update = Update.de_json(update_data, application.bot)
            
             async_to_sync(application.update_queue.put)(update)
