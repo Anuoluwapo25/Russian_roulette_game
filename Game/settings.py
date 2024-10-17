@@ -28,7 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'russian-roulette-game.onrender.com',
     '127.0.0.1',
-    'localhost'
+    'localhost',
+    "http://localhost:5173",  
+    "http://127.0.0.1:5173",
 ]
 
 
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Bot.apps.BotConfig',
     'rest_framework',
+    'corsheaders',
 ]
 
 import os
@@ -63,6 +66,7 @@ APPEND_SLASH = False
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -91,6 +95,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Game.wsgi.application'
+
+CORS_ALLOW_ALL_ORIGINS = False  # Don't use this in production!
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  
+    "http://127.0.0.1:5173",
+    "https://russian-roullette-4taj.vercel.app/",
+
+]
+
+# If you need to allow credentials (cookies, authorization headers)
+CORS_ALLOW_CREDENTIALS = True
 
 
 # Database
@@ -166,6 +182,31 @@ PORT = int(os.environ.get('PORT', 10000))
 
 
 STATIC_URL = '/static/'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
 
 # STATIC_ROOT = BASE_DIR / 'staticfiles'
 

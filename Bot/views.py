@@ -54,18 +54,23 @@ def webhook_view(request):
 class TelegramAuthView(APIView):
     def post(self, request):
         auth_data = request.data
+        logger.info(f"Received Telegram auth request: {auth_data}")
+        
         backend = TelegramAuthBackend()
         user = backend.authenticate(request, telegram_data=auth_data)
         
         if user:
             login(request, user, backend='authentication.TelegramAuthBackend')
             player, created = Player.objects.get_or_create(user=user)
+            logger.info(f"Authentication successful for user {user.id}")
             return Response({
                 'message': 'Authentication successful',
+                'username': user.telegram_username,
                 'user_id': user.id,
                 'player_id': player.id
             }, status=status.HTTP_200_OK)
         else:
+            logger.warning("Authentication failed")
             return Response({
                 'message': 'Authentication failed'
             }, status=status.HTTP_401_UNAUTHORIZED)
