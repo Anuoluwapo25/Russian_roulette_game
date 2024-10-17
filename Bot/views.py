@@ -53,27 +53,45 @@ def webhook_view(request):
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramAuthView(APIView):
     def post(self, request):
+        logger.info("Received POST request to TelegramAuthView")
+        logger.debug(f"Request data: {request.data}")
+
         auth_data = request.data
-        logger.info(f"Received Telegram auth request: {auth_data}")
-        
         backend = TelegramAuthBackend()
-        user = backend.authenticate(request, telegram_data=auth_data)
         
-        if user:
-            login(request, user, backend='authentication.TelegramAuthBackend')
-            player, created = Player.objects.get_or_create(user=user)
-            logger.info(f"Authentication successful for user {user.id}")
+        try:
+            user = backend.authenticate(request, telegram_data=auth_data)
+            
+            if user:
+                if user.auth_date:
+                    logger.info(f"Updated existing user: {user.telegram_id}")
+                else:
+                    logger.info(f"Created new user: {user.telegram_id}")
+                
+                login(request, user, backend='authentication.TelegramAuthBackend')
+                player, created = Player.objects.get_or_create(user=user)
+                
+                if created:
+                    logger.info(f"Created new player for user: {user.telegram_id}")
+                else:
+                    logger.info(f"Retrieved existing player for user: {user.telegram_id}")
+                
+                logger.info(f"Authentication successful for user {user.id}")
+                return Response({
+                    'message': 'Authentication successful',
+                    'user_id': user.id,
+                    'player_id': player.id
+                }, status=status.HTTP_200_OK)
+            else:
+                logger.warning("Authentication failed")
+                return Response({
+                    'message': 'Authentication failed'
+                }, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            logger.error(f"Error during authentication: {str(e)}")
             return Response({
-                'message': 'Authentication successful',
-                'username': user.telegram_username,
-                'user_id': user.id,
-                'player_id': player.id
-            }, status=status.HTTP_200_OK)
-        else:
-            logger.warning("Authentication failed")
-            return Response({
-                'message': 'Authentication failed'
-            }, status=status.HTTP_401_UNAUTHORIZED)
+                'message': 'Internal server error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class GetUserView(APIView):
     permission_classes = [IsAuthenticated]
