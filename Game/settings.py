@@ -29,8 +29,6 @@ ALLOWED_HOSTS = [
     'russian-roulette-game.onrender.com',
     '127.0.0.1',
     'localhost',
-    "http://localhost:5173",  
-    "http://127.0.0.1:5173",
 ]
 
 
@@ -96,7 +94,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Game.wsgi.application'
 
-CORS_ALLOW_ALL_ORIGINS = False  # Don't use this in production!
+CORS_ALLOW_ALL_ORIGINS = True  # Don't use this in production!
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  
@@ -169,11 +167,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-CORS_ALLOWED_ORIGINS = [
-    "https://russian-roullette-4taj.vercel.app",
-]
-CORS_ALLOW_CREDENTIALS = True
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -197,7 +190,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console', 'file'],
-        'level': 'INFO',
+        'level': 'DEBUG',
     },
     'loggers': {
         'django': {

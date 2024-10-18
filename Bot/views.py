@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -51,31 +53,33 @@ def webhook_view(request):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
+@permission_classes([AllowAny])  
 class TelegramAuthView(APIView):
     def post(self, request):
         logger.info("Received POST request to TelegramAuthView")
-        logger.debug(f"Request data: {request.data}")
+        logger.debug(f"Request data: {request.body}")
+        logger.debug(f"Request headers: {request.headers}")
 
         auth_data = request.data
         backend = TelegramAuthBackend()
-        
+
         try:
             user = backend.authenticate(request, telegram_data=auth_data)
-            
+
             if user:
                 if user.auth_date:
                     logger.info(f"Updated existing user: {user.telegram_id}")
                 else:
                     logger.info(f"Created new user: {user.telegram_id}")
-                
+
                 login(request, user, backend='authentication.TelegramAuthBackend')
                 player, created = Player.objects.get_or_create(user=user)
-                
+
                 if created:
                     logger.info(f"Created new player for user: {user.telegram_id}")
                 else:
                     logger.info(f"Retrieved existing player for user: {user.telegram_id}")
-                
+
                 logger.info(f"Authentication successful for user {user.id}")
                 return Response({
                     'message': 'Authentication successful',
