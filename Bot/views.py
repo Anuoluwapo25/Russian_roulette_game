@@ -63,7 +63,7 @@ class TelegramUserView(APIView):
             data = request.data
             
             # Extract data from the request
-            telegram_id = data.get('telegram_id')
+            telegram_id = data.get('id')
             telegram_username = data.get('telegram_username')
             first_name = data.get('first_name')
             last_name = data.get('last_name', '')
