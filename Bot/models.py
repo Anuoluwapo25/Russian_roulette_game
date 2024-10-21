@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 class TelegramUser(AbstractUser):
     telegram_id = models.CharField(max_length=255, unique=True)
-    telegram_username = models.CharField(max_length=255, unique=True) 
+    telegram_username = models.CharField(max_length=255, unique=True, null=True, blank=True) 
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255, blank=True, null=True)
     photo_url = models.URLField(blank=True, null=True)

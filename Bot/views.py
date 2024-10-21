@@ -62,12 +62,17 @@ class TelegramUserView(APIView):
         try:
             data = request.data
             
-            # Extract data from the request
+            # Map 'id' to 'telegram_id'
             telegram_id = data.get('id')
-            telegram_username = data.get('telegram_username')
+            telegram_username = data.get('telegram_username', f'user_{telegram_id}')  # Use a fallback value
             first_name = data.get('first_name')
             last_name = data.get('last_name', '')
             photo_url = data.get('photo_url', None)
+
+            if not telegram_id:
+                return Response({
+                    'message': 'telegram_id (id) is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
             
             # Check if the user already exists
             user, created = TelegramUser.objects.get_or_create(
