@@ -53,8 +53,9 @@ def webhook_view(request):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-@permission_classes([AllowAny])
 class TelegramUserView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         logger.info("Received POST request to TelegramUserView")
         logger.debug(f"Request data: {request.data}")
@@ -62,9 +63,7 @@ class TelegramUserView(APIView):
         try:
             data = request.data
             
-            # Map 'id' to 'telegram_id'
             telegram_id = data.get('id')
-            telegram_username = data.get('telegram_username', f'user_{telegram_id}')  # Use a fallback value
             first_name = data.get('first_name')
             last_name = data.get('last_name', '')
             photo_url = data.get('photo_url', None)
@@ -75,26 +74,19 @@ class TelegramUserView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Check if the user already exists
-            user, created = TelegramUser.objects.get_or_create(
+            user, created = TelegramUser.objects.update_or_create(
                 telegram_id=telegram_id,
                 defaults={
-                    'telegram_username': telegram_username,
                     'first_name': first_name,
                     'last_name': last_name,
                     'photo_url': photo_url,
                 }
             )
             
-            if not created:
-                # If the user already exists, update the existing data
-                user.telegram_username = telegram_username
-                user.first_name = first_name
-                user.last_name = last_name
-                user.photo_url = photo_url
-                user.save()
-                logger.info(f"Updated existing user: {user.telegram_id}")
-            else:
+            if created:
                 logger.info(f"Created new user: {user.telegram_id}")
+            else:
+                logger.info(f"Updated existing user: {user.telegram_id}")
                 
             return Response({
                 'message': 'Data stored successfully',

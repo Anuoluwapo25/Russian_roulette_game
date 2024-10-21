@@ -37,24 +37,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Add the command handler to the application
 application.add_handler(CommandHandler("start", start))
 
-# Run the bot with webhook configuration
+application.run_polling()
 
 
-def main():
-    try:
-        logging.info("Starting bot with webhook...")
-        application.run_webhook(
-            listen="0.0.0.0",
-            port=PORT,
-            url_path=TELEGRAM_TOKEN,  # This secures the webhook endpoint
-            webhook_url=WEBHOOK_URL
-        )
-    except Exception as e:
-        logging.error(f"Error while running webhook: {e}")
-        raise
+# def main():
+#     try:
+#         logging.info("Starting bot with webhook...")
+#         application.run_webhook(
+#             listen="0.0.0.0",
+#             port=PORT,
+#             url_path=TELEGRAM_TOKEN,  # This secures the webhook endpoint
+#             webhook_url=WEBHOOK_URL
+#         )
+#     except Exception as e:
+#         logging.error(f"Error while running webhook: {e}")
+#         raise
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+    # main()
 
 
 
