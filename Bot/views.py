@@ -64,7 +64,7 @@ class TelegramUserView(APIView):
             
             # Map 'id' to 'telegram_id'
             telegram_id = data.get('id')
-            telegram_username = data.get('username', f'user_{telegram_id}')  # Use a fallback value
+            telegram_username = data.get('username') # Use a fallback value
             first_name = data.get('first_name')
             last_name = data.get('last_name', '')
             photo_url = data.get('photo_url', None)
