@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import AllowAny
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import permission_classes, api_view
 from django.views.decorators.http import require_POST
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,8 +11,7 @@ from telegram import Update
 from telegram.ext import Application
 from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import async_to_sync
-from .models import TelegramUser, Player
-from rest_framework import status
+from .models import TelegramUser
 import os
 import os.path
 import json
@@ -52,10 +51,10 @@ def webhook_view(request):
     return JsonResponse({"status": "not allowed"}, status=405)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-@permission_classes([AllowAny])  
 @csrf_exempt
 @require_POST
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def create_telegram_user(request):
     try:
         data = json.loads(request.body)
@@ -82,7 +81,7 @@ def create_telegram_user(request):
                 'first_name': data['first_name'],
                 'last_name': data.get('last_name', ''),
                 'photo_url': data.get('photo_url', ''),
-                'username': data['telegram_username'],
+                'username': data['telegram_username'],  # Set username to telegram_username
             }
         )
         return JsonResponse({
