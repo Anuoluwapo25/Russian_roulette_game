@@ -3,20 +3,20 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import permission_classes
+from django.views.decorators.http import require_POST
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from telegram import Update
 from telegram.ext import Application
 from django.views.decorators.csrf import csrf_exempt
+from asgiref.sync import async_to_sync
+from .models import TelegramUser, Player
 from rest_framework import status
 import os
 import os.path
 import json
 import logging
-from asgiref.sync import async_to_sync
-from .models import Player
-from .auth_backends import TelegramAuthBackend
 
 
 
@@ -54,48 +54,52 @@ def webhook_view(request):
 
 @method_decorator(csrf_exempt, name='dispatch')
 @permission_classes([AllowAny])  
-class TelegramAuthView(APIView):
-    def post(self, request):
-        logger.info("Received POST request to TelegramAuthView")
-        logger.debug(f"Request data: {request.body}")
-        logger.debug(f"Request headers: {request.headers}")
-
-        auth_data = request.data
-        backend = TelegramAuthBackend()
-
-        try:
-            user = backend.authenticate(request, telegram_data=auth_data)
-
-            if user:
-                if user.auth_date:
-                    logger.info(f"Updated existing user: {user.telegram_id}")
-                else:
-                    logger.info(f"Created new user: {user.telegram_id}")
-
-                login(request, user, backend='authentication.TelegramAuthBackend')
-                player, created = Player.objects.get_or_create(user=user)
-
-                if created:
-                    logger.info(f"Created new player for user: {user.telegram_id}")
-                else:
-                    logger.info(f"Retrieved existing player for user: {user.telegram_id}")
-
-                logger.info(f"Authentication successful for user {user.id}")
-                return Response({
-                    'message': 'Authentication successful',
-                    'user_id': user.id,
-                    'player_id': player.id
-                }, status=status.HTTP_200_OK)
-            else:
-                logger.warning("Authentication failed")
-                return Response({
-                    'message': 'Authentication failed'
-                }, status=status.HTTP_401_UNAUTHORIZED)
-        except Exception as e:
-            logger.error(f"Error during authentication: {str(e)}")
-            return Response({
-                'message': 'Internal server error'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@csrf_exempt
+@require_POST
+def create_telegram_user(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Basic validation
+        required_fields = ['telegram_id', 'telegram_username', 'first_name']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Missing required field: {field}'
+                }, status=400)
+        
+        if not data['telegram_id'].isdigit():
+            return JsonResponse({
+                'success': False,
+                'message': 'telegram_id must be numeric'
+            }, status=400)
+        
+        user, created = TelegramUser.objects.update_or_create(
+            telegram_id=data['telegram_id'],
+            defaults={
+                'telegram_username': data['telegram_username'],
+                'first_name': data['first_name'],
+                'last_name': data.get('last_name', ''),
+                'photo_url': data.get('photo_url', ''),
+                'username': data['telegram_username'],
+            }
+        )
+        return JsonResponse({
+            'success': True,
+            'message': 'User created' if created else 'User updated',
+            'user_id': user.id
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON in request body'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=400)
 
 class GetUserView(APIView):
     permission_classes = [IsAuthenticated]
