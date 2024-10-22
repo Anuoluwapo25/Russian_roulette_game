@@ -280,3 +280,17 @@ load_ssl_context verify=True cert=None trust_env=True http2=False
 load_verify_locations cafile='/Users/macintoshhd/Russian_roulette_game/myenv/lib/python3.10/site-packages/certifi/cacert.pem'
 load_ssl_context verify=True cert=None trust_env=True http2=False
 load_verify_locations cafile='/Users/macintoshhd/Russian_roulette_game/myenv/lib/python3.10/site-packages/certifi/cacert.pem'
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+load_ssl_context verify=True cert=None trust_env=True http2=False
+load_verify_locations cafile='/Users/macintoshhd/Russian_roulette_game/myenv/lib/python3.10/site-packages/certifi/cacert.pem'
+load_ssl_context verify=True cert=None trust_env=True http2=False
+load_verify_locations cafile='/Users/macintoshhd/Russian_roulette_game/myenv/lib/python3.10/site-packages/certifi/cacert.pem'
+Received POST request to TelegramUserView
+Request data: {'test_mode': True, 'id': '4567', 'first_name': 'funmilayo', 'last_name': 'Ali', 'photo_url': 'https://example.com/photo.jpg', 'auth_date': '163456789'}
+Attempting to create/update user with telegram_id: 4567
+Existing user found: False
+Created new user: 4567
+Verification successful: User exists with ID 4567
+"POST /telegram-auth/ HTTP/1.1" 200 71
+"POST /telegram-auth/ HTTP/1.1" 200 71
