@@ -3,18 +3,17 @@ from django.contrib.auth.models import AbstractUser
 
 class TelegramUser(AbstractUser):
     telegram_id = models.CharField(max_length=255, unique=True)
-    telegram_username = models.CharField(max_length=255, unique=True, null=True, blank=True) 
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255, blank=True, null=True)
     photo_url = models.URLField(blank=True, null=True)
     auth_date = models.DateTimeField(auto_now_add=True)
 
+    username = None 
+    USERNAME_FIELD = 'telegram_id' 
+    REQUIRED_FIELDS = ['first_name'] 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.telegram_id})"
 
-    class Meta:
-        verbose_name = 'Telegram User'
-        verbose_name_plural = 'Telegram Users'
 
 
 class Player(models.Model):
@@ -23,7 +22,7 @@ class Player(models.Model):
     score = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.user.telegram_username 
+        return self.user.telegram_id
 
 
 class GameSession(models.Model):
@@ -32,4 +31,4 @@ class GameSession(models.Model):
     result = models.IntegerField()
 
     def __str__(self):
-        return f"Game for {self.player.user.telegram_username} at {self.timestamp}"
+        return f"Game for {self.player.user.telegram_id} at {self.timestamp}"
