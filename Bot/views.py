@@ -103,63 +103,66 @@ def webhook_view(request):
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramUserView(APIView):
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         logger.info("Received POST request to TelegramUserView")
         logger.info(f"Request data: {request.data}")
-        
+
         try:
             with transaction.atomic():  # Start atomic transaction
+                logger.info("Transaction started")
                 data = request.data
-                
+
                 telegram_id = str(data.get('id'))
                 first_name = data.get('first_name')
                 last_name = data.get('last_name', '')
                 photo_url = data.get('photo_url', None)
                 auth_date = data.get('auth_date')
-                
+
                 if not telegram_id:
                     logger.error("Missing telegram_id in request")
                     return Response({
                         'message': 'telegram_id (id) is required'
                     }, status=status.HTTP_400_BAD_REQUEST)
-                
+
                 logger.info(f"Attempting to create/update user with telegram_id: {telegram_id}")
-                
-                # First try to get the existing user
-                user = TelegramUser.objects.filter(telegram_id=telegram_id).first()
-                logger.info(f"Existing user found: {user is not None}")
-                
-                if user:
-                    # Update existing user
-                    user.first_name = first_name
-                    user.last_name = last_name
-                    user.photo_url = photo_url
-                    user.save()
-                    logger.info(f"Updated existing user: {user.telegram_id}")
-                else:
-                    # Create new user
-                    user = TelegramUser.objects.create(
-                        telegram_id=telegram_id,
-                        first_name=first_name,
-                        last_name=last_name,
-                        photo_url=photo_url
-                    )
+
+                # Use update_or_create to either update an existing user or create a new one
+                user, created = TelegramUser.objects.update_or_create(
+                    telegram_id=telegram_id,
+                    defaults={
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'photo_url': photo_url
+                    }
+                )
+
+                if created:
                     logger.info(f"Created new user: {user.telegram_id}")
-                
+                else:
+                    logger.info(f"Updated existing user: {user.telegram_id}")
+
+                # Log user ID for verification
+                logger.info(f"User with telegram_id {telegram_id} has ID {user.id}")
+
                 # Verify the user was saved
                 verification_user = TelegramUser.objects.get(telegram_id=telegram_id)
                 logger.info(f"Verification successful: User exists with ID {verification_user.telegram_id}")
+
+                logger.info("Preparing to return successful response")
                 
+                # Log success in the response
+                logger.info("Data stored successfully")
+
                 return Response({
                     'message': 'Data stored successfully',
                     'user_id': user.id,
                     'telegram_id': user.telegram_id
                 }, status=status.HTTP_200_OK)
-                
+
         except Exception as e:
             logger.error(f"Error while saving data: {str(e)}")
-            logger.exception("Full traceback:")
+            logger.exception("Full traceback:", exc_info=True)
             return Response({
                 'message': 'Internal server error',
                 'error': str(e)
