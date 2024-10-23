@@ -162,8 +162,8 @@ REST_FRAMEWORK = {
 
 
 AUTHENTICATION_BACKENDS = [
-    'path.to.TelegramAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',  
+    'Bot.auth_backends.TelegramAuthBackend',
+    'django.contrib.auth.backends.ModelBackend', 
 ]
 
 
