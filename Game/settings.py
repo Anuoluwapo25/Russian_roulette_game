@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Bot.apps.BotConfig',
+    # 'Bot.apps.BotConfig',
+    'Bot',
     'rest_framework',
     'corsheaders',
 ]
@@ -171,6 +172,7 @@ AUTHENTICATION_BACKENDS = [
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 AUTH_USER_MODEL = 'Bot.TelegramUser'
+
 PORT = int(os.environ.get('PORT', 10000))
 
 

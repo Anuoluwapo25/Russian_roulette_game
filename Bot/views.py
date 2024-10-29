@@ -1,10 +1,11 @@
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from telegram import Update
+from rest_framework import generics
 from django.db import transaction
 from telegram.ext import Application
 from django.views.decorators.csrf import csrf_exempt
@@ -14,7 +15,7 @@ import os.path
 import json
 import logging
 from asgiref.sync import async_to_sync
-from .models import TelegramUser
+from .models import Player, Game, TelegramUser
 
 
 
@@ -167,3 +168,32 @@ class TelegramUserView(APIView):
                 'message': 'Internal server error',
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def select_number_view(request):
+    user = request.user  # The authenticated TelegramUser
+    player = request.data.get('player')  # e.g., Player 1, Player 2, etc.
+    number = request.data.get('number')  # The number the player is selecting
+
+    # Ensure the player and number are provided
+    if player is None or number is None:
+        return Response({"error": "Player and number must be provided."}, status=400)
+
+    # Get or create a game for the user
+    game, created = Game.objects.get_or_create(user=user, current_game=True)
+
+    try:
+        # Let the user select a number
+        message = game.select_number(player, number)
+        return Response({"message": message}, status=200)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=400)
+    
+
+@api_view(['POST'])
+def spin_wheel(request):
+    # Your logic for spinning the wheel goes here
+    return Response({"message": "Wheel spun"}, status=status.HTTP_200_OK)

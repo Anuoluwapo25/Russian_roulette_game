@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 
@@ -22,39 +23,55 @@ class TelegramUserManager(BaseUserManager):
 
         return self.create_user(telegram_id, first_name, password, **extra_fields)
     
-
-class TelegramUser(AbstractUser):
-    telegram_id = models.CharField(max_length=255, unique=True)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255, blank=True, null=True)
-    photo_url = models.URLField(blank=True, null=True)
-    auth_date = models.DateTimeField(auto_now_add=True)
-
-    username = None 
-    USERNAME_FIELD = 'telegram_id' 
-    REQUIRED_FIELDS = ['first_name'] 
-
-    objects = TelegramUserManager()
-
-    def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.telegram_id})"
     
 
-
 class Player(models.Model):
-    user = models.OneToOneField(TelegramUser, on_delete=models.CASCADE, null=True) 
-    wallet_connected = models.BooleanField(default=False)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     score = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user.telegram_id 
 
 
-class GameSession(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    result = models.IntegerField() 
+class Game(models.Model):
+    current_game = models.BooleanField(default=False)
+    selected_number = models.IntegerField(null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def select_number(self, player, number):
+        if not self.current_game:
+            raise ValueError("No active game")
+
+        player_ranges = {
+            1: range(1, 6), 
+            2: range(6, 11),  
+            3: range(11, 16)  
+        }
+
+        if player not in player_ranges:
+            raise ValueError("Invalid player number")
+
+        if number not in player_ranges[player]:
+            raise ValueError(f"Number must be in range {player_ranges[player].start}-{player_ranges[player].stop - 1}")
+
+        self.selected_number = number
+        self.save()
+
+        return f"Player {player} selected {number}"
+
+    def get_selected_number(self):
+        return self.selected_number
+
+    def clear_game_data(self):
+        self.selected_number = None
+        self.current_game = False
+        self.save()
 
     def __str__(self):
-        return f"Game for {self.player.user.telegram_id} at {self.timestamp}"
+        return f"Game by {self.user} - Selected number: {self.selected_number if self.selected_number else 'None'}"
+
+    
+
+
+
 
